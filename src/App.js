@@ -9,7 +9,7 @@ const App = () => {
       <Routes>
         {/* Define a route for the root path */}
         <Route path="/" element={<Navigate to="/register" />} />
-        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/Register-auth" element={<RegistrationPage />} />
         <Route path="/test-auth" element={<TestAuthPage />} />
       </Routes>
     </Router>
