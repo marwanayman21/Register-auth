@@ -11,7 +11,7 @@ const TestAuthPage = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        navigate("/register"); // Using navigate instead of history.push
+        navigate("/Register-auth"); 
         return;
       }
 
