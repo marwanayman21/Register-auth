@@ -8,7 +8,7 @@ const RegistrationPage = () => {
     password_confirmation: "",
     mobile_country_code: "+20",
     mobile: "",
-    client_type: "B2C", // Default to 'B2C'
+    client_type: "B2C", 
     issuing_authority: "",
     company_name: "",
     commercial_license_number: "",
@@ -36,7 +36,7 @@ const RegistrationPage = () => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token);
-        window.location.href = "/test-auth"; // Redirect on successful registration
+        window.location.href = "/test-auth";
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Registration failed");
