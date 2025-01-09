@@ -1,46 +1,55 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+
+const BASE_URL = "https://print.trendline.marketing/api";
 
 const TestAuthPage = () => {
   const [username, setUsername] = useState(null);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        navigate("/Register-auth"); 
-        return;
-      }
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
 
+    const fetchData = async () => {
       try {
-        const response = await fetch("https://print.trendline.marketing/api/test-auth", {
-          method: "GET",
+        const response = await fetch(`${BASE_URL}/test-auth`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setUsername(data.username);
-        } else {
-          setError("Failed to fetch user data");
+        const contentType = response.headers.get("content-type");
+
+        if (!response.ok || !contentType.includes("application/json")) {
+          const errorText = await response.text();
+          console.error("Error Response:", errorText);
+          throw new Error("Failed to fetch data");
         }
+
+        const data = await response.json();
+
+        // Update the username state with data.name
+        setUsername(data.data.name || "Guest");
       } catch (err) {
-        setError("Something went wrong");
+        console.error("Fetch error:", err);
+        localStorage.removeItem("token");
+        window.location.href = "/";
       }
     };
 
-    fetchUserData();
-  }, [navigate]);
+    fetchData();
+  }, []);
 
   return (
-    <div>
-      {error && <p>{error}</p>}
-      {username ? <h1>Welcome, {username}</h1> : <p>Loading...</p>}
+    <div className="flex items-center justify-center h-screen">
+      {username ? (
+        <h1 className="text-2xl font-bold">Welcome, {username}!</h1>
+      ) : (
+        <p className="text-lg">Loading...</p>
+      )}
     </div>
   );
 };
