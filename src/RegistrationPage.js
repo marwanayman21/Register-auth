@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+const BASE_URL = "https://print.trendline.marketing/api";
+
 const RegistrationPage = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -8,11 +10,13 @@ const RegistrationPage = () => {
     password_confirmation: "",
     mobile_country_code: "+20",
     mobile: "",
-    client_type: "B2C", 
+    client_type: "B2C",
     issuing_authority: "",
     company_name: "",
     commercial_license_number: "",
   });
+
+  const [formErrors, setFormErrors] = useState({});
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -24,8 +28,9 @@ const RegistrationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await fetch("https://print.trendline.marketing/api/register", {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,16 +38,17 @@ const RegistrationPage = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.data.token);
         window.location.href = "/test-auth";
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Registration failed");
+        setFormErrors(data.errors || {});
+        setError(data.message || "Registration failed");
       }
     } catch (err) {
-      setError("Something went wrong");
+      setError(`Error: ${err.message || "Something went wrong"}`);
     }
   };
 
@@ -50,10 +56,10 @@ const RegistrationPage = () => {
     <div className="w-full px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-lg text-center">
         <h1 className="text-2xl font-bold sm:text-3xl">Create Your Account</h1>
-        {error && <p className="text-red-500">{error}</p>}
+        {error && !Object.keys(formErrors).length && <p className="text-red-500">{error}</p>} {/* General error */}
       </div>
       <form onSubmit={handleSubmit} className="mx-auto mb-0 mt-8 max-w-md space-y-4">
-        {/* Name Field */}
+        {/* Full Name */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium">Full Name</label>
           <input
@@ -66,9 +72,10 @@ const RegistrationPage = () => {
             placeholder="Enter your full name"
             required
           />
+          {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name[0]}</p>} {/* Show specific error */}
         </div>
 
-        {/* Email Field */}
+        {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium">Email Address</label>
           <input
@@ -81,9 +88,10 @@ const RegistrationPage = () => {
             placeholder="Enter your email"
             required
           />
+          {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email[0]}</p>} {/* Show specific error */}
         </div>
 
-        {/* Password Field */}
+        {/* Password */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium">Password</label>
           <input
@@ -96,9 +104,10 @@ const RegistrationPage = () => {
             placeholder="Enter your password"
             required
           />
+          {formErrors.password && <p className="text-red-500 text-sm">{formErrors.password[0]}</p>} {/* Show specific error */}
         </div>
 
-        {/* Confirm Password Field */}
+        {/* Confirm Password */}
         <div>
           <label htmlFor="password_confirmation" className="block text-sm font-medium">Confirm Password</label>
           <input
@@ -111,9 +120,10 @@ const RegistrationPage = () => {
             placeholder="Confirm your password"
             required
           />
+          {formErrors.password_confirmation && <p className="text-red-500 text-sm">{formErrors.password_confirmation[0]}</p>} {/* Show specific error */}
         </div>
 
-        {/* Mobile Field */}
+        {/* Mobile */}
         <div>
           <label htmlFor="mobile" className="block text-sm font-medium">Mobile Number</label>
           <div className="flex">
@@ -135,10 +145,11 @@ const RegistrationPage = () => {
               placeholder="Enter your mobile number"
               required
             />
+            {formErrors.mobile && <p className="text-red-500 text-sm">{formErrors.mobile[0]}</p>} {/* Show specific error */}
           </div>
         </div>
 
-        {/* Client Type Field */}
+        {/* Client Type */}
         <div>
           <label htmlFor="client_type" className="block text-sm font-medium">Client Type</label>
           <select
@@ -153,7 +164,7 @@ const RegistrationPage = () => {
           </select>
         </div>
 
-        {/* Additional fields for B2B clients */}
+        {/* Additional Fields for B2B */}
         {formData.client_type === "B2B" && (
           <>
             <div>
@@ -197,6 +208,7 @@ const RegistrationPage = () => {
           </>
         )}
 
+        {/* Submit Button */}
         <button type="submit" className="bg-green-800 text-white w-full py-3 mt-6 rounded-md">
           Register
         </button>
